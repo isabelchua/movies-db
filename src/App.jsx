@@ -3,11 +3,11 @@ import axios from "axios";
 import "./App.css";
 
 function App() {
-	const [data, setData] = useState(null);
+	const [movies, setMovies] = useState([]);
+	const [isLoading, setIsLoading] = useState(true);
 
 	useEffect(() => {
 		const fetchData = async () => {
-			// Define the query parameters
 			const queryParams = {
 				country: "us",
 				services: "netflix",
@@ -16,13 +16,11 @@ function App() {
 				keyword: "zombie"
 			};
 
-			// Convert the query parameters to a query string
 			const queryString = Object.keys(queryParams)
 				.map(key => `${key}=${encodeURIComponent(queryParams[key])}`)
 				.join("&");
 
-			// Construct the API URL with the query string
-			const url = `https://streaming-availability.p.rapidapi.com/countries?${queryString}`;
+			const url = `https://streaming-availability.p.rapidapi.com/search/ultraviolet?${queryString}`;
 
 			const options = {
 				method: "GET",
@@ -36,30 +34,37 @@ function App() {
 
 			try {
 				const response = await axios.request(options);
-				console.log(response.data);
-				setData(response.data);
+				setMovies(response.data.results);
+				setIsLoading(false);
 			} catch (error) {
 				console.error(error);
+				setIsLoading(false);
 			}
 		};
 
 		fetchData();
 	}, []);
 
-	// Render the data object as key-value pairs
-	const renderData = () => {
-		if (!data) return null;
-
-		return (
-			<ul>
-				{Object.entries(data).map(([key, value], index) => (
-					<li key={index}>
-						<strong>{key}:</strong> {value}
-					</li>
-				))}
-			</ul>
-		);
-	};
+	return (
+		<div>
+			<h1>Movies</h1>
+			{isLoading ? (
+				<p>Loading...</p>
+			) : (
+				<ul>
+					{movies.map(movie => (
+						<li key={movie.id}>
+							<strong>Title:</strong> {movie.title}
+							<br />
+							<strong>Year:</strong> {movie.year}
+							<br />
+							{/* Add more movie details here */}
+						</li>
+					))}
+				</ul>
+			)}
+		</div>
+	);
 }
 
 export default App;
