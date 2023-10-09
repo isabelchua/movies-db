@@ -16,15 +16,13 @@ function App() {
 				keyword: "zombie"
 			};
 
-			const queryString = Object.keys(queryParams)
-				.map(key => `${key}=${encodeURIComponent(queryParams[key])}`)
-				.join("&");
-
-			const url = `https://streaming-availability.p.rapidapi.com/search/ultraviolet?${queryString}`;
+			const url =
+				"https://streaming-availability.p.rapidapi.com/search/filters";
 
 			const options = {
 				method: "GET",
 				url,
+				params: queryParams,
 				headers: {
 					"X-RapidAPI-Key":
 						"e8a837f932msh64eef34d549516ap1a55bejsn0fa83d38dde5",
@@ -34,7 +32,7 @@ function App() {
 
 			try {
 				const response = await axios.request(options);
-				setMovies(response.data.results);
+				setMovies(response.data.result);
 				setIsLoading(false);
 			} catch (error) {
 				console.error(error);
@@ -53,12 +51,31 @@ function App() {
 			) : (
 				<ul>
 					{movies.map(movie => (
-						<li key={movie.id}>
+						<li key={movie.imdbId}>
 							<strong>Title:</strong> {movie.title}
 							<br />
 							<strong>Year:</strong> {movie.year}
 							<br />
-							{/* Add more movie details here */}
+							<strong>Genres:</strong>{" "}
+							{movie.genres.map(genre => genre.name).join(", ")}
+							<br />
+							{movie.streamingInfo.us.map((info, index) => (
+								<div key={index}>
+									<strong>Streaming Service:</strong> {info.service}
+									<br />
+									<strong>Link:</strong>{" "}
+									<a
+										href={info.link}
+										target="_blank"
+										rel="noopener noreferrer"
+									>
+										Watch on {info.service}
+									</a>
+									<br />
+									{/* Add more streaming info here */}
+								</div>
+							))}
+							<hr />
 						</li>
 					))}
 				</ul>
