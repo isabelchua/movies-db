@@ -20,16 +20,10 @@ function App() {
 			})
 			.then(response => {
 				// Ensure genres data is present in the API response
-				if (
-					response.data.result &&
-					typeof response.data.result === "object" &&
-					Object.keys(response.data.result).length > 0
-				) {
+				if (response.data.result) {
 					setGenres(response.data.result);
 				} else {
-					console.error(
-						"Genres data is missing or empty in the API response."
-					);
+					console.error("Genres data is missing in the API response.");
 				}
 			})
 			.catch(error => {
@@ -46,10 +40,10 @@ function App() {
 		const fetchData = async () => {
 			const queryParams = {
 				country: "us",
-				services: "netflix"
-				// show_type: "movie",
-				// keyword: "zombie",
-				// genres: selectedGenre
+				services: "netflix",
+				show_type: "movie",
+				keyword: "zombie",
+				genres: selectedGenre
 			};
 
 			const url =
@@ -68,17 +62,7 @@ function App() {
 
 			try {
 				const response = await axios.request(options);
-				// Filter out duplicate links for each movie
-				const filteredMovies = response.data.result.map(movie => ({
-					...movie,
-					streamingInfo: {
-						us: movie.streamingInfo.us.filter(
-							(info, index, self) =>
-								index === self.findIndex(i => i.link === info.link)
-						)
-					}
-				}));
-				console.log(filteredMovies);
+				const filteredMovies = response.data.result || []; // Ensure there are results
 				setMovies(filteredMovies);
 				setIsLoading(false);
 			} catch (error) {
@@ -88,7 +72,7 @@ function App() {
 		};
 
 		fetchData();
-	}, [selectedGenre]);
+	}, [selectedGenre]); // Include selectedGenre as a dependency
 
 	const handleGenreChange = event => {
 		setSelectedGenre(event.target.value);
